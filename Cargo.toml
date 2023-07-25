@@ -1,0 +1,26 @@
+[package]
+name = "quilkin-network-conditioner"
+version = "0.1.0"
+description = "A set of Quilkin filters that can be used to simulate network conditions"
+repository = "https://github.com/pierd/quilking-network-conditioner"
+homepage = "https://github.com/pierd/quilking-network-conditioner"
+edition = "2021"
+
+[dependencies]
+async-trait = "0.1.68"
+bytes = "1.4.0"
+clap = { version = "4.3.0", features = ["cargo", "derive", "env"] }
+prost = "0.11.9"
+prost-types = "0.11.9"
+quilkin = "0.6.0"
+schemars = "0.8.12"
+serde = "1.0.163"
+serde_yaml = "0.9.21"
+tokio = { version = "1.28.1", features = ["rt-multi-thread", "fs", "signal", "test-util", "parking_lot", "tracing"] }
+tonic = "0.9.2"
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.17", features = ["json", "env-filter"] }
+
+[build-dependencies]
+prost-build = "0.11.9"
+protobuf-src = "1.1.0"

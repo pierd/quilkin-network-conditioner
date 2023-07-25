@@ -1,0 +1,6 @@
+version: v1alpha1
+filters:
+  - name: delay.v1
+    config:
+      on_read: { millis: 5 }
+      on_write: { millis: 5 }

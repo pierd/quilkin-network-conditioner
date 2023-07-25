@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package delay;
+
+message Duration {
+  uint64 secs = 1;
+  uint64 millis = 2;
+  uint64 micros = 3;
+  uint64 nanos = 4;
+}
+
+message Delay {
+  Duration on_read = 1;
+  Duration on_write = 2;
+}
