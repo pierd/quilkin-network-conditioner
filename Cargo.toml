@@ -1,10 +1,15 @@
 [package]
 name = "quilkin-network-conditioner"
 version = "0.1.0"
+edition = "2021"
+authors = ["Kuba Jaroszewski <jakub.jaroszewski@gmail.com>"]
 description = "A set of Quilkin filters that can be used to simulate network conditions"
 repository = "https://github.com/pierd/quilking-network-conditioner"
 homepage = "https://github.com/pierd/quilking-network-conditioner"
-edition = "2021"
+keywords = ["networking", "udp"]
+categories = ["network-programming"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 async-trait = "0.1.68"
