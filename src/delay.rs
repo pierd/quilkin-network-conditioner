@@ -8,6 +8,9 @@ use quilkin::filters::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
+// sync sleep if the duration is less than 2ms
+const MAX_SYNC_DURATION: std::time::Duration = std::time::Duration::from_millis(2);
+
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, schemars::JsonSchema)]
 pub struct Duration {
     #[serde(default)]
@@ -85,35 +88,61 @@ impl From<Config> for proto::Delay {
     }
 }
 
+struct Sleeper {
+    sync: bool,
+    duration: Option<std::time::Duration>,
+}
+
+impl Sleeper {
+    async fn sleep(&self) {
+        if let Some(duration) = self.duration {
+            if self.sync {
+                std::thread::sleep(duration);
+            } else {
+                tokio::time::sleep(duration).await;
+            }
+        }
+    }
+}
+
+impl From<Option<Duration>> for Sleeper {
+    fn from(duration: Option<Duration>) -> Self {
+        let duration: Option<std::time::Duration> = duration.map(Into::into);
+        Self {
+            sync: duration.map(|d| d <= MAX_SYNC_DURATION).unwrap_or(false),
+            duration,
+        }
+    }
+}
+
 pub struct Delay {
-    config: Config,
+    on_read: Sleeper,
+    on_write: Sleeper,
 }
 
 #[async_trait::async_trait]
 impl Filter for Delay {
     async fn read(&self, _ctx: &mut ReadContext) -> Result<(), FilterError> {
-        if let Some(delay) = self.config.on_read {
-            tokio::time::sleep(delay.into()).await;
-        }
+        self.on_read.sleep().await;
         Ok(())
     }
 
     async fn write(&self, _ctx: &mut WriteContext) -> Result<(), FilterError> {
-        if let Some(delay) = self.config.on_write {
-            tokio::time::sleep(delay.into()).await;
-        }
+        self.on_write.sleep().await;
         Ok(())
     }
 }
 
 impl StaticFilter for Delay {
-    const NAME: &'static str = "delay.v1";
+    const NAME: &'static str = "delay";
     type Configuration = Config;
     type BinaryConfiguration = proto::Delay;
 
     fn try_from_config(config: Option<Self::Configuration>) -> Result<Self, CreationError> {
+        let config = Self::ensure_config_exists(config)?;
         Ok(Self {
-            config: Self::ensure_config_exists(config)?,
+            on_read: config.on_read.into(),
+            on_write: config.on_write.into(),
         })
     }
 }
